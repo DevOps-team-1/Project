@@ -1,0 +1,5 @@
+---
+# vars file for apache
+http_host: "site"
+http_conf: "apache.conf"
+http_port: "80"

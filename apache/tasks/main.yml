@@ -1,0 +1,23 @@
+---
+# tasks file for apache
+  - name: install Apache
+    apt: name=apache2 update_cache=yes state=latest
+
+  - name: create site folder
+    file:
+       path: /var/www/{{ http_host }}
+       state: directory
+  
+  - name: set up virtualhost
+    template:
+       src: "files/apache.conf"
+       dest: "/etc/apache2/sites-available/{{ http_conf }}"
+
+  - name: rewrite
+    command: a2enmod rewrite
+
+  - name: enabled site
+    command: a2ensite apache.conf
+
+  - name: disabled default config
+    command: a2dissite 000-default.conf 
