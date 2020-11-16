@@ -5,5 +5,5 @@
   roles:
     - apache
     - mysql
-    - php
-    - NoviNano
+#    - php
+#    - NoviNano
