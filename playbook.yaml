@@ -1,6 +1,6 @@
 ---
 - name: launch site on LAMP
-  host: LAMP
+  hosts: LAMP
   become: yes
   roles:
     - apache
