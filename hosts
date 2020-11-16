@@ -1,0 +1,8 @@
+[LAMP]
+
+ubuntu20.04  ansible_host=34.69.112.247
+ubuntu  ansible_host=35.232.1.86 
+
+[LAMP:vars]
+ansible_user=ansible
+ansible_ssh_private_key_file=/home/ansible/.ssh/id_rsa
