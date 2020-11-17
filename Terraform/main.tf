@@ -26,8 +26,8 @@ resource "google_compute_instance" "test_instans" {
     }
   }
   provisioner "file" {
-    source      = "../playbook.yaml"
-    destination = "~/playbook.yaml"
+    source      = "Ansible"
+    destination = "~/Ansible"
 
     connection {
         type = "ssh"
@@ -39,13 +39,13 @@ resource "google_compute_instance" "test_instans" {
 
   provisioner "remote-exec" {
     inline = [
-          "echo ${self.network_interface.0.access_config.0.nat_ip} >> ~/pub_ip_address.txt",
+          "echo ${self.network_interface.0.access_config.0.nat_ip} >> ~/Ansible/hosts",
           "sudo apt update",
           "sudo apt install software-properties-common",
           "sudo apt-add-repository --yes --update ppa:ansible/ansible",
           "sudo apt install ansible",
           "ansible-galaxy collection install community.mysql",
-          "ansible-playbook playbook.yaml"
+          "ansible-playbook -i '${self.network_interface.0.access_config.0.nat_ip},' --private-key ${file("id_rsa")} ~/Ansible/playbook.yaml"
       ]
     connection {
           type = "ssh"
@@ -72,4 +72,8 @@ resource "google_compute_network" "vpc_network" {
 
 output "ip" {
   value = google_compute_instance.test_instans.*.network_interface.0.access_config.0.nat_ip
+}
+
+output "ip2" {
+  value = google_compute_instance.test_instans.*.network_interface.1.access_config.1.nat_ip
 }
