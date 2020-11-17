@@ -1,2 +1,23 @@
 ---
 # tasks file for php
+- name: install php
+  apt: name={{ item }} update_cache=yes state=latest
+  loop: [ 'php', 'php-mysql', 'libapache2-mod-php' ]
+
+- name: install php extensions
+  apt: name={{ item }} update_cache=yes state=latest
+  loop: "{{ php_modules }}"
+
+- name: remove default config file
+  shell: rm /var/www/site/wp-config.php
+
+- name: Set up wp-config
+  template:
+     src: "files/wp-config.php"
+     dest: "/var/www/{{ http_host }}/wp-config.php"
+
+- name: reload apache2
+  service: name=apache2 state=reloaded
+
+- name: restart apache2
+  service: name=apache2 state=restarted

@@ -1,2 +1,12 @@
 ---
 # vars file for php
+php_modules: [ 'php-curl', 'php-gd', 'php-mbstring', 'php-xml', 'php-xmlrpc', 'php-soap', 'php-intl', 'php-zip', 'php-mysqlnd' ]
+
+mysql_root_password: "DevOps"
+mysql_user: "devops"
+mysql_db: "site"
+mysql_password: "DevOps-team-1"
+
+http_host: "site"
+http_conf: "apache.conf"
+http_port: "80"
