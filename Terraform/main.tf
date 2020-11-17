@@ -40,8 +40,12 @@ resource "google_compute_instance" "test_instans" {
   provisioner "remote-exec" {
     inline = [
           "echo ${self.network_interface.0.access_config.0.nat_ip} >> ~/pub_ip_address.txt",
-//          "chmod +x lamp.sh",
-//          "sudo bash lamp.sh"
+          "sudo apt update",
+          "sudo apt install software-properties-common",
+          "sudo apt-add-repository --yes --update ppa:ansible/ansible",
+          "sudo apt install ansible",
+          "ansible-galaxy collection install community.mysql",
+          "ansible-playbook playbook.yaml"
       ]
     connection {
           type = "ssh"
