@@ -73,7 +73,3 @@ resource "google_compute_network" "vpc_network" {
 output "ip" {
   value = google_compute_instance.test_instans.*.network_interface.0.access_config.0.nat_ip
 }
-
-output "ip2" {
-  value = google_compute_instance.test_instans.*.network_interface.1.access_config.1.nat_ip
-}
