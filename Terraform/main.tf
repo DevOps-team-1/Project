@@ -25,17 +25,17 @@ resource "google_compute_instance" "test_instans" {
     access_config {
     }
   }
-//  provisioner "file" {
-//    source      = "lamp.sh"
-//    destination = "~/lamp.sh"
-//
-//    connection {
-//        type = "ssh"
-//        user = "samirus"
-//        private_key = file("id_rsa")
-//        host = self.network_interface.0.access_config.0.nat_ip
-//    }
-//  }
+  provisioner "file" {
+    source      = "../playbook.yaml"
+    destination = "~/playbook.yaml"
+
+    connection {
+        type = "ssh"
+        user = "samirus"
+        private_key = file("id_rsa")
+        host = self.network_interface.0.access_config.0.nat_ip
+    }
+  }
 
   provisioner "remote-exec" {
     inline = [
