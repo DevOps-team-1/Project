@@ -7,3 +7,10 @@
     - mysql
     - NoviNano
     - php
+
+
+- name: launch jenkins in vm
+  hosts: jenkins
+  become: yes
+  roles:
+    - jenkins
