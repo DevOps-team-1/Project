@@ -6,10 +6,10 @@ provider "google" {
   user_project_override = true
 }
 
-resource "google_compute_autoscaler" "foobar" {
+resource "google_compute_autoscaler" "autoscal" {
   name   = "my-autoscaler"
   zone   = "us-central1-f"
-  target = google_compute_instance_group_manager.foobar.id
+  target = google_compute_instance_group_manager.my_group.id
 
   autoscaling_policy {
     max_replicas    = 5
@@ -22,7 +22,7 @@ resource "google_compute_autoscaler" "foobar" {
   }
 }
 
-resource "google_compute_instance_template" "foobar" {
+resource "google_compute_instance_template" "my_instance" {
   name           = "my-instance-template"
   machine_type   = "e2-medium"
   can_ip_forward = false
@@ -48,20 +48,20 @@ resource "google_compute_instance_template" "foobar" {
   }
 }
 
-resource "google_compute_target_pool" "foobar" {
+resource "google_compute_target_pool" "my_target_pool" {
   name = "my-target-pool-2"
 }
 
-resource "google_compute_instance_group_manager" "foobar" {
+resource "google_compute_instance_group_manager" "my_group" {
   name = "my-igm"
   zone = "us-central1-f"
 
   version {
-    instance_template  = google_compute_instance_template.foobar.id
+    instance_template  = google_compute_instance_template.my_instance.id
     name               = "primary"
   }
 
-  target_pools       = [google_compute_target_pool.foobar.id]
+  target_pools       = [google_compute_target_pool.my_target_pool.id]
   base_instance_name = "foobar"
 }
 
@@ -75,11 +75,19 @@ resource "google_compute_network" "vpc_network" {
   auto_create_subnetworks = "true"
 }
 
-resource "google_compute_firewall" "default" {
+resource "google_compute_firewall" "my_firewall" {
   name    = "terraformfirewall"
   network = google_compute_network.vpc_network.name
   allow {
     protocol = "tcp"
-    ports    = ["80", "9090", "22"]
+    ports    = "80"
   }
+}
+
+module "gce-lb-fr" {
+  source       = "github.com/GoogleCloudPlatform/terraform-google-lb"
+  region       = var.region
+  name         = "group1-lb"
+  service_port = "80"
+  target_tags  = ["allow-lb-service"]
 }
