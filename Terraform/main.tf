@@ -1,27 +1,10 @@
 provider "google" {
-  credentials = file(var.credentials)
+  credentials = var.credentials
   project     = var.project
   region      = var.region
   zone        = var.zone
   user_project_override = true
 }
-
-resource "google_compute_autoscaler" "autoscal" {
-  name   = "my-autoscaler-2"
-  zone   = var.zone
-  target = google_compute_instance_group_manager.my_group.id
-
-  autoscaling_policy {
-    max_replicas    = 5
-    min_replicas    = 2
-    cooldown_period = 60
-
-    cpu_utilization {
-      target = 0.5
-    }
-  }
-}
-
 
 resource "google_compute_instance" "my_jencins_instance" {
   name           = "my-jencins-instance"
@@ -45,12 +28,39 @@ resource "google_compute_instance" "my_jencins_instance" {
     }
   }
 }
-
 resource "google_compute_instance" "my_ansible_instance" {
   name           = "my-ansible-instance"
   machine_type   = "e2-medium"
   can_ip_forward = false
   metadata_startup_script = file("Ansible.sh")
+
+  provisioner "file" {
+  source = "Ansible"
+  destination = "~/Ansible"
+
+  connection {
+    host = self.network_interface.0.access_config.0.nat_ip
+    type = "ssh"
+    user = var.user
+    private_key = "id_rsa"
+    agent = "false"
+    }
+  }
+
+  provisioner "remote-exec" {
+    connection {
+      host = self.network_interface.0.access_config.0.nat_ip
+      type = "ssh"
+      user = var.user
+      private_key = "id_rsa"
+      agent = "false"
+    }
+    inline = [
+      "cat '[LAMP]' Ansible/hosts",
+//      "cat [self.network_interface.0.acat_ip]",
+      "./Ansible.sh"
+    ]
+  }
 
   network_interface {
     network = google_compute_network.vpc_network.name
@@ -91,7 +101,7 @@ resource "google_compute_target_pool" "my_target_pool" {
 }
 
 resource "google_compute_instance_group_manager" "my_group" {
-  name = "my-igm-2"
+  name = "my-igm"
   zone = var.zone
 
   version {
@@ -100,7 +110,7 @@ resource "google_compute_instance_group_manager" "my_group" {
   }
 
   target_pools       = [google_compute_target_pool.my_target_pool.id]
-  base_instance_name = "lamp_autoscala"
+  base_instance_name = "lamp"
 }
 
 resource "google_compute_network" "vpc_network" {
@@ -111,10 +121,9 @@ resource "google_compute_network" "vpc_network" {
 resource "google_compute_firewall" "my_firewall" {
   name    = "terraformfirewall"
   network = google_compute_network.vpc_network.name
-
   allow {
     protocol = "tcp"
-    ports    = ["80", "8080", "1000-2000"]
+    ports    = [80]
   }
 }
 
@@ -124,4 +133,21 @@ module "gce-lb-fr" {
   name         = "group1-lb"
   service_port = "80"
   target_tags  = ["allow-lb-service"]
+}
+
+
+resource "google_compute_autoscaler" "autoscal" {
+  name   = "my-autoscaler"
+  zone   = var.zone
+  target = google_compute_instance_group_manager.my_group.id
+
+  autoscaling_policy {
+    max_replicas    = 4
+    min_replicas    = 2
+    cooldown_period = 60
+
+    cpu_utilization {
+      target = 0.5
+    }
+  }
 }
