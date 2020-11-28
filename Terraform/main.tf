@@ -50,6 +50,7 @@ resource "google_compute_instance" "my_ansible_instance" {
   name           = "my-ansible-instance"
   machine_type   = "e2-medium"
   can_ip_forward = false
+  metadata_startup_script = file("Ansible.sh")
 
   network_interface {
     network = google_compute_network.vpc_network.name
