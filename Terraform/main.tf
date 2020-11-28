@@ -1,19 +1,19 @@
 provider "google" {
-  credentials = file("prefab-mountain-292413-8ee3c7307748.json")
-  project     = "prefab-mountain-292413"
-  region      = "us-central1"
-  zone        = "us-central1-f"
+  credentials = file(var.credentials)
+  project     = var.project
+  region      = var.region
+  zone        = var.zone
   user_project_override = true
 }
 
 resource "google_compute_autoscaler" "autoscal" {
-  name   = "my-autoscaler"
-  zone   = "us-central1-f"
+  name   = "my-autoscaler-2"
+  zone   = var.zone
   target = google_compute_instance_group_manager.my_group.id
 
   autoscaling_policy {
     max_replicas    = 5
-    min_replicas    = 1
+    min_replicas    = 2
     cooldown_period = 60
 
     cpu_utilization {
@@ -22,16 +22,13 @@ resource "google_compute_autoscaler" "autoscal" {
   }
 }
 
-resource "google_compute_instance_template" "my_instance" {
-  name           = "my-instance-template"
+
+resource "google_compute_instance" "my_jencins_instance" {
+  name           = "my-jencins-instance"
   machine_type   = "e2-medium"
   can_ip_forward = false
 
-  tags = ["foo", "bar"]
 
-  disk {
-    source_image = data.google_compute_image.debian_9.id
-  }
 
   network_interface {
     network = google_compute_network.vpc_network.name
@@ -39,8 +36,48 @@ resource "google_compute_instance_template" "my_instance" {
     }
   }
 
-  metadata = {
-    foo = "bar"
+  service_account {
+    scopes = ["userinfo-email", "compute-ro", "storage-ro"]
+  }
+  boot_disk {
+    initialize_params {
+      image = "ubuntu-2004-focal-v20201014"
+    }
+  }
+}
+
+resource "google_compute_instance" "my_ansible_instance" {
+  name           = "my-ansible-instance"
+  machine_type   = "e2-medium"
+  can_ip_forward = false
+
+  network_interface {
+    network = google_compute_network.vpc_network.name
+    access_config {
+    }
+  }
+
+  boot_disk {
+    initialize_params {
+      image = "ubuntu-2004-focal-v20201014"
+    }
+  }
+}
+
+resource "google_compute_instance_template" "my_instance" {
+  name           = "my-instance-template"
+  machine_type   = "e2-medium"
+  can_ip_forward = false
+  tags = ["foo", "bar"]
+
+  disk {
+    source_image = "ubuntu-2004-focal-v20201014"
+  }
+
+  network_interface {
+    network = google_compute_network.vpc_network.name
+    access_config {
+    }
   }
 
   service_account {
@@ -53,8 +90,8 @@ resource "google_compute_target_pool" "my_target_pool" {
 }
 
 resource "google_compute_instance_group_manager" "my_group" {
-  name = "my-igm"
-  zone = "us-central1-f"
+  name = "my-igm-2"
+  zone = var.zone
 
   version {
     instance_template  = google_compute_instance_template.my_instance.id
@@ -62,12 +99,7 @@ resource "google_compute_instance_group_manager" "my_group" {
   }
 
   target_pools       = [google_compute_target_pool.my_target_pool.id]
-  base_instance_name = "foobar"
-}
-
-data "google_compute_image" "debian_9" {
-  family  = "debian-9"
-  project = "debian-cloud"
+  base_instance_name = "lamp_autoscala"
 }
 
 resource "google_compute_network" "vpc_network" {
@@ -78,9 +110,10 @@ resource "google_compute_network" "vpc_network" {
 resource "google_compute_firewall" "my_firewall" {
   name    = "terraformfirewall"
   network = google_compute_network.vpc_network.name
+
   allow {
     protocol = "tcp"
-    ports    = "80"
+    ports    = ["80", "8080", "1000-2000"]
   }
 }
 
