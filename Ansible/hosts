@@ -1,6 +1,6 @@
 [LAMP]
 
-ubuntu20.04  ansible_host=35.232.1.86
+ubuntu20.04  ansible_host=34.121.237.191  
 
 [jenkins]
 
