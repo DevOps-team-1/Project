@@ -3,16 +3,18 @@
 - name: install prerequisites
   apt: name=aptitude update_cache=yes state=latest force_apt_get=yes
 
-- name: clone git repo
-  git:
-    repo: "https://github.com/mplesha/NoviNano.git"
-    dest: /home/ansible/NoviNano
-    force: yes
-- name: clear site directory
-  shell: "rm -r /var/www/{{ http_host }}/*"
+- name: download archive
+  get_url:
+    url: https://github.com/mplesha/NoviNano/releases/download/v1.0/20180706_novinano_mt_b2a03d4e0cbc53e87026180706071957_archive.zip
+    dest: /var/www/{{ http_host }}/
 
-- name: move directory to web
-  shell: "mv /home/ansible/NoviNano/mt/* /var/www/{{ http_host }}/"
+- name: download installer
+  get_url:
+    url: https://github.com/mplesha/NoviNano/releases/download/v1.0/20180706_novinano_mt_b2a03d4e0cbc53e87026180706071957_installer.php
+    dest: ~/
+
+- name: rename installer.php
+  command: mv ~/20180706_novinano_mt_b2a03d4e0cbc53e87026180706071957_installer.php /var/www/{{ http_host }}/installer.php
 
 - name: set rights for site folder
   file:
@@ -27,3 +29,8 @@
 
 - name: Set permissions for files
   shell: "/usr/bin/find /var/www/{{ http_host }} -type f -exec chmod 640 {} \\;"
+
+- name: remove index.html
+  file:
+    path: /var/www/html/index.html
+    state: absent
