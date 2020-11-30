@@ -75,7 +75,7 @@ resource "google_compute_instance" "my_ansible_instance" {
   }
 }
 
-resource "google_compute_instance_template" "my_instance" {
+resource "google_compute_instance_template" "my_lamp_instance" {
   name           = "my-instance-template"
   machine_type   = "e2-medium"
   can_ip_forward = false
@@ -105,7 +105,7 @@ resource "google_compute_instance_group_manager" "my_group" {
   zone = var.zone
 
   version {
-    instance_template  = google_compute_instance_template.my_instance.id
+    instance_template  = google_compute_instance_template.my_lamp_instance.id
     name               = "primary"
   }
 
@@ -150,4 +150,14 @@ resource "google_compute_autoscaler" "autoscal" {
       target = 0.5
     }
   }
+}
+
+resource "local_file" "Ansible" {
+  content = templatefile("Ansible/hosts",
+    {
+      lamp_instances = google_compute_instance_template.my_lamp_instance.*.network_interface.0.access_config.0.nat_ip
+      jencins_instance = google_compute_instance.my_jencins_instance.*.network_interface.0.access_config.0.nat_ip
+    }
+  )
+  filename = "Ansible/hosts"
 }
