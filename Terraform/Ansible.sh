@@ -1,7 +1,7 @@
 #!/bin/bash
 apt update
-apt install apache2 -y
-sudo apt install software-properties-common -y
+apt install apache2
+sudo apt install software-properties-common
 sudo apt-add-repository --yes --update ppa:ansible/ansible
-sudo apt install ansible -y
+sudo apt install ansible
 ansible-galaxy collection install community.mysql
