@@ -1,10 +1,6 @@
 [LAMP]
 
-ubuntu20.04  ansible_host=34.121.237.191  
-
-[jenkins]
-
-ubunut20.04  ansible_host=34.121.50.123  
+ubuntu20.04  ansible_host=34.121.237.191
 
 [LAMP:vars]
 ansible_user=ansible
