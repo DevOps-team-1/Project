@@ -6,75 +6,6 @@ provider "google" {
   user_project_override = true
 }
 
-resource "google_compute_instance" "my_jencins_instance" {
-  name           = "my-jencins-instance"
-  machine_type   = "e2-medium"
-  can_ip_forward = false
-
-
-
-  network_interface {
-    network = google_compute_network.vpc_network.name
-    access_config {
-    }
-  }
-
-  service_account {
-    scopes = ["userinfo-email", "compute-ro", "storage-ro"]
-  }
-  boot_disk {
-    initialize_params {
-      image = "ubuntu-2004-focal-v20201014"
-    }
-  }
-}
-resource "google_compute_instance" "my_ansible_instance" {
-  name           = "my-ansible-instance"
-  machine_type   = "e2-medium"
-  can_ip_forward = false
-  metadata_startup_script = file("Ansible.sh")
-
-  provisioner "file" {
-  source = "Ansible"
-  destination = "~/Ansible"
-
-  connection {
-    host = self.network_interface.0.access_config.0.nat_ip
-    type = "ssh"
-    user = var.user
-    private_key = "id_rsa"
-    agent = "false"
-    }
-  }
-
-  provisioner "remote-exec" {
-    connection {
-      host = self.network_interface.0.access_config.0.nat_ip
-      type = "ssh"
-      user = var.user
-      private_key = "id_rsa"
-      agent = "false"
-    }
-    inline = [
-      "cat '[LAMP]' Ansible/hosts",
-//      "cat [self.network_interface.0.acat_ip]",
-      "./Ansible.sh"
-    ]
-  }
-
-  network_interface {
-    network = google_compute_network.vpc_network.name
-    access_config {
-    }
-  }
-
-  boot_disk {
-    initialize_params {
-      image = "ubuntu-2004-focal-v20201014"
-    }
-  }
-}
-
 resource "google_compute_instance_template" "my_lamp_instance" {
   name           = "my-instance-template"
   machine_type   = "e2-medium"
@@ -150,14 +81,4 @@ resource "google_compute_autoscaler" "autoscal" {
       target = 0.5
     }
   }
-}
-
-resource "local_file" "Ansible" {
-  content = templatefile("Ansible/hosts",
-    {
-      lamp_instances = google_compute_instance_template.my_lamp_instance.*.network_interface.0.access_config.0.nat_ip
-      jencins_instance = google_compute_instance.my_jencins_instance.*.network_interface.0.access_config.0.nat_ip
-    }
-  )
-  filename = "Ansible/hosts"
 }
