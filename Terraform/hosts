@@ -4,11 +4,6 @@
 ${ip}
 %{ endfor ~}
 
-[jenkins]
-
-%{ for ip in jencins_instance ~}
-${ip}
-%{ endfor ~}
 
 [LAMP:vars]
 ansible_user=samirus

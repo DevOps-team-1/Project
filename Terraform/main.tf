@@ -6,6 +6,7 @@ provider "google" {
   user_project_override = true
 }
 
+
 resource "google_compute_instance_template" "my_lamp_instance" {
   name           = "my-instance-template"
   machine_type   = "e2-medium"
@@ -82,3 +83,19 @@ resource "google_compute_autoscaler" "autoscal" {
     }
   }
 }
+
+////// file edit
+
+resource "local_file" "hosts_cfg" {
+  content = templatefile(file("hosts"), { lamp_instances = google_compute_instance_template.my_lamp_instance.network_interface[0].access_config[0].nat_ip }                             )
+  filename = "hosts.cfg"
+}
+
+////// another method
+
+//data "template_file" "init" {
+//  template = "${file("hosts")}"
+//  vars = {
+//    consul_address = "${google_compute_instance_template.my_lamp_instance.network_interface[0].access_config[0].nat_ip}"
+//  }
+//}
