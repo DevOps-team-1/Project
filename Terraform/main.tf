@@ -75,7 +75,7 @@ resource "google_compute_autoscaler" "autoscal" {
 
   autoscaling_policy {
     max_replicas    = 4
-    min_replicas    = 1
+    min_replicas    = 2
     cooldown_period = 60
 
     cpu_utilization {
@@ -109,7 +109,7 @@ resource "google_compute_autoscaler" "autoscal" {
 
 resource "local_file" "hosts_cfg" {
   content = templatefile(file("hosts"), { lamp_instances = google_compute_instance_template.my_lamp_instance.network_interface[0].access_config[0].nat_ip }                             )
-  filename = "hosts.cfg"
+  filename = "hosts"
 }
 
 
