@@ -1,6 +1,0 @@
-[LAMP]
-ansible_host=35.238.157.35
-[LAMP]
-ansible_host=35.202.202.91
-[LAMP:vars]
-ansible_user=ansible
