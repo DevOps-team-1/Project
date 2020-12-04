@@ -1,10 +1,3 @@
-provider "google" {
-  credentials = var.credentials
-  project     = var.project
-  region      = var.region
-  zone        = var.zone
-  user_project_override = true
-}
 
 resource "google_compute_instance" "my_ansible_instance" {
   name           = "my-ansible-instance"
@@ -17,7 +10,7 @@ resource "google_compute_instance" "my_ansible_instance" {
     }
   }
   provisioner "local-exec" {
-    command = " echo [LAMP] > hosts ;echo  ansible_host=${ self.network_interface[0].network_ip }  >> hosts ; echo [LAMP:vars] >> hosts ; echo ansible_user=ansible >> hosts"
+     command = " echo [LAMP] > hosts ;echo ubuntu20.04 ansible_host=${ self.network_interface[0].network_ip }  >> hosts ; echo [LAMP:vars] >> hosts ; echo ansible_user=ansible >> hosts ; echo ansible_ssh_private_key_file=/home/jenkins/.ssh/id_rsa "
   }
 
   boot_disk {
