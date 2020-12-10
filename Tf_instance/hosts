@@ -1,0 +1,4 @@
+[LAMP]
+ansible_host=10.128.0.2
+[LAMP:vars]
+ansible_user=ansible

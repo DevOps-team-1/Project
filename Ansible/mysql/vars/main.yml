@@ -1,6 +1,0 @@
----
-# vars file for mysql
-mysql_root_password: "DevOps"
-mysql_user: "devops"
-mysql_db: "site"
-mysql_password: "DevOps-team-1"

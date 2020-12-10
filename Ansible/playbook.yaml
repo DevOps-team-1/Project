@@ -1,9 +1,0 @@
----
-- name: launch site on LAMP
-  hosts: LAMP
-  become: yes
-  roles:
-    - apache
-    - mysql
-    - NoviNano
-    - php
